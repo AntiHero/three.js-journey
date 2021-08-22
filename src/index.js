@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 const scene = new THREE.Scene();
 const canvas = document.querySelector('.webgl');
 
