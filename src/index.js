@@ -8,6 +8,11 @@ const material = new THREE.MeshBasicMaterial({
   color: 'blue',
 });
 const mesh = new THREE.Mesh(geometry, material);
+mesh.position.x = .7;
+mesh.position.y = -.6;
+mesh.position.z = -1;
+
+mesh.rotation.y = Math.PI * .4;
 
 scene.add(mesh);
 
@@ -19,8 +24,17 @@ const sizes = {
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
 camera.position.z = 3;
 camera.position.y = 1;
+camera.position.x = 1;
 scene.add(camera);
 
+const axesHelper = new THREE.AxesHelper();
+scene.add(axesHelper);
+
+camera.lookAt(mesh.position)
+
+/**
+ * Renderer
+ */
 const renderer = new THREE.WebGLRenderer({
   canvas,
 });
