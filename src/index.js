@@ -1,26 +1,26 @@
-import * as THREE from 'three';
-import gsap from 'gsap';
+import * as THREE from "three";
+import gsap from "gsap";
 
 const scene = new THREE.Scene();
-const canvas = document.querySelector('.webgl');
+const canvas = document.querySelector(".webgl");
 
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({
-  color: 'lightgreen',
+  color: "lightgreen",
 });
 const mesh = new THREE.Mesh(geometry, material);
-mesh.position.x = .7;
-mesh.position.y = -.6;
+mesh.position.x = 0.7;
+mesh.position.y = -0.6;
 mesh.position.z = -1;
 
-mesh.rotation.y = Math.PI * .4;
+mesh.rotation.y = Math.PI * 0.4;
 
 scene.add(mesh);
 
 const sizes = {
   width: 800,
   height: 600,
-}
+};
 
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
 camera.position.z = 3;
@@ -32,7 +32,7 @@ scene.add(camera);
 // const axesHelper = new THREE.AxesHelper();
 // scene.add(axesHelper);
 
-camera.lookAt(mesh.position)
+camera.lookAt(mesh.position);
 
 /**
  * Renderer
@@ -50,7 +50,6 @@ gsap.to(mesh.position, {
   delay: 1.5,
   x: -1,
 });
-
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
