@@ -22,7 +22,10 @@ const sizes = {
   height: 600,
 };
 
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
+// const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, .1, 100);
+
+const aspectRatio = sizes.width /sizes.height;
+const camera = new THREE.OrthographicCamera(-1 * aspectRatio, 1 * aspectRatio, 1, -1, .1, 100);
 camera.position.z = 3;
 camera.position.y = 1;
 camera.position.x = 1;
@@ -45,11 +48,11 @@ renderer.setSize(sizes.width, sizes.height);
 
 const clock = new THREE.Clock();
 
-gsap.to(mesh.position, {
-  duration: 1,
-  delay: 1.5,
-  x: -1,
-});
+//gsap.to(mesh.position, {
+//  duration: 1,
+//  delay: 1.5,
+//  x: -1,
+//});
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
