@@ -1,6 +1,7 @@
 import * as THREE from "three";
-import gsap from "gsap";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import styles from "./css/style.css";
+import gsap from "gsap";
 
 /**
  * Cursor
@@ -15,6 +16,14 @@ window.addEventListener("mousemove", function (ev) {
   cursor.y = -ev.clientY / sizes.height + 0.5;
 });
 
+window.addEventListener("dblclick", () => {
+  if (!document.fullscreenElement) {
+    canvas.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+});
+
 const scene = new THREE.Scene();
 const canvas = document.querySelector(".webgl");
 
@@ -27,16 +36,27 @@ const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
 
 const sizes = {
-  width: 800,
-  height: 600,
+  width: window.innerWidth,
+  height: window.innerHeight,
 };
 
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-);
+window.addEventListener("resize", () => {
+  sizes.width = window.innerWidth;
+  sizes.height = window.innerHeight;
+
+  // update camera
+  camera.aspect = sizes.width / sizes.height;
+  camera.updateProjectionMatrix();
+
+  // update renderer
+  renderer.setSize(sizes.width, sizes.height);
+
+  // set pixel ration
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
 
 const aspectRatio = sizes.width / sizes.height;
+const camera = new THREE.PerspectiveCamera(75, aspectRatio);
 
 camera.position.z = 2;
 camera.position.y = 2;
@@ -82,7 +102,7 @@ const tick = () => {
   // camera.lookAt(mesh.position)
 
   controls.update();
-  
+
   renderer.render(scene, camera);
   window.requestAnimationFrame(tick);
 };
