@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import styles from "./css/style.css";
-import gsap from "gsap";
+// import styles from "./css/style.css";
+// import gsap from "gsap";
 
 /**
  * Cursor
