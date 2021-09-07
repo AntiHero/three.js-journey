@@ -30,6 +30,7 @@ const canvas = document.querySelector(".webgl");
 const geometry = new THREE.BoxGeometry(1, 1, 1, 5, 5, 5);
 const material = new THREE.MeshBasicMaterial({
   color: "lightgreen",
+  wireframe: true,
 });
 const mesh = new THREE.Mesh(geometry, material);
 
