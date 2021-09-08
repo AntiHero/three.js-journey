@@ -30,6 +30,7 @@ const canvas = document.querySelector(".webgl");
 const geometry = new THREE.BufferGeometry();
 
 const verticies = new Float32Array(9);
+
 verticies[0] = 0;
 verticies[1] = 0;
 verticies[2] = 0;
@@ -39,7 +40,6 @@ verticies[5] = 0;
 verticies[6] = 1;
 verticies[7] = 0;
 verticies[8] = 0;
-
 
 geometry.setAttribute("position", new THREE.BufferAttribute(verticies, 3));
 
