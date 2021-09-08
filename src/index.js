@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import styles from "./css/style.css";
-import gsap from "gsap";
+// import gsap from "gsap";
 
 /**
  * Cursor
@@ -27,9 +27,25 @@ window.addEventListener("dblclick", () => {
 const scene = new THREE.Scene();
 const canvas = document.querySelector(".webgl");
 
-const geometry = new THREE.BoxGeometry(1, 1, 1, 5, 5, 5);
+const geometry = new THREE.BufferGeometry();
+
+const verticies = new Float32Array(9);
+
+verticies[0] = 0;
+verticies[1] = 0;
+verticies[2] = 0;
+verticies[3] = 0;
+verticies[4] = 1;
+verticies[5] = 0;
+verticies[6] = 1;
+verticies[7] = 0;
+verticies[8] = 0;
+
+geometry.setAttribute("position", new THREE.BufferAttribute(verticies, 3));
+
 const material = new THREE.MeshBasicMaterial({
   color: "lightgreen",
+  wireframe: true,
 });
 const mesh = new THREE.Mesh(geometry, material);
 
