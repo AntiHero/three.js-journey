@@ -1,7 +1,19 @@
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import styles from "./css/style.css";
-// import gsap from "gsap";
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import * as dat from 'dat.gui';
+import './css/style.css';
+import gsap from 'gsap';
+
+/**
+ * Debug
+ */
+const gui = new dat.GUI({ width: 300 });
+// gui.hide();
+
+const params = {
+  color: 0xee00aa,
+  spin: () => {},
+};
 
 /**
  * Cursor
@@ -11,21 +23,8 @@ const cursor = {
   y: 0,
 };
 
-window.addEventListener("mousemove", function (ev) {
-  cursor.x = ev.clientX / sizes.width - 0.5;
-  cursor.y = -ev.clientY / sizes.height + 0.5;
-});
-
-window.addEventListener("dblclick", () => {
-  if (!document.fullscreenElement) {
-    canvas.requestFullscreen();
-  } else {
-    document.exitFullscreen();
-  }
-});
-
 const scene = new THREE.Scene();
-const canvas = document.querySelector(".webgl");
+const canvas = document.querySelector('.webgl');
 
 const geometry = new THREE.BufferGeometry();
 
@@ -41,35 +40,32 @@ verticies[6] = 1;
 verticies[7] = 0;
 verticies[8] = 0;
 
-geometry.setAttribute("position", new THREE.BufferAttribute(verticies, 3));
-
+geometry.setAttribute('position', new THREE.BufferAttribute(verticies, 3));
 const material = new THREE.MeshBasicMaterial({
-  color: "lightgreen",
+  color: params.color,
   wireframe: true,
 });
 const mesh = new THREE.Mesh(geometry, material);
 
+params.spin = () => {
+  gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + 10 });
+};
+
 scene.add(mesh);
+
+gui.add(mesh.position, 'y', -3, 3, 0.1).name('elevation');
+gui.add(mesh.position, 'x', -3, 3, 0.1);
+gui.add(mesh, 'visible');
+gui.add(mesh.material, 'wireframe');
+gui.addColor(params, 'color').onChange(() => {
+  material.color.set(params.color);
+});
+gui.add(params, 'spin');
 
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 };
-
-window.addEventListener("resize", () => {
-  sizes.width = window.innerWidth;
-  sizes.height = window.innerHeight;
-
-  // update camera
-  camera.aspect = sizes.width / sizes.height;
-  camera.updateProjectionMatrix();
-
-  // update renderer
-  renderer.setSize(sizes.width, sizes.height);
-
-  // set pixel ration
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-});
 
 const aspectRatio = sizes.width / sizes.height;
 const camera = new THREE.PerspectiveCamera(75, aspectRatio);
@@ -102,11 +98,38 @@ renderer.setSize(sizes.width, sizes.height);
 
 const clock = new THREE.Clock();
 
-//gsap.to(mesh.position, {
+// gsap.to(mesh.position, {
 //  duration: 1,
 //  delay: 1.5,
 //  x: -1,
-//});
+// });
+window.addEventListener('resize', () => {
+  sizes.width = window.innerWidth;
+  sizes.height = window.innerHeight;
+
+  // update camera
+  camera.aspect = sizes.width / sizes.height;
+  camera.updateProjectionMatrix();
+
+  // update renderer
+  renderer.setSize(sizes.width, sizes.height);
+
+  // set pixel ration
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
+
+window.addEventListener('mousemove', (ev) => {
+  cursor.x = ev.clientX / sizes.width - 0.5;
+  cursor.y = -ev.clientY / sizes.height + 0.5;
+});
+
+window.addEventListener('dblclick', () => {
+  if (!document.fullscreenElement) {
+    canvas.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+});
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
