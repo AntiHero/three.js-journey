@@ -1,7 +1,19 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import styles from './css/style.css';
-// import gsap from "gsap";
+import * as dat from 'dat.gui';
+import './css/style.css';
+import gsap from 'gsap';
+
+/**
+ * Debug
+ */
+const gui = new dat.GUI({ width: 300 });
+// gui.hide();
+
+const params = {
+  color: 0xee00aa,
+  spin: () => {},
+};
 
 /**
  * Cursor
@@ -29,14 +41,26 @@ verticies[7] = 0;
 verticies[8] = 0;
 
 geometry.setAttribute('position', new THREE.BufferAttribute(verticies, 3));
-
 const material = new THREE.MeshBasicMaterial({
-  color: 'lightgreen',
+  color: params.color,
   wireframe: true,
 });
 const mesh = new THREE.Mesh(geometry, material);
 
+params.spin = () => {
+  gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + 10 });
+};
+
 scene.add(mesh);
+
+gui.add(mesh.position, 'y', -3, 3, 0.1).name('elevation');
+gui.add(mesh.position, 'x', -3, 3, 0.1);
+gui.add(mesh, 'visible');
+gui.add(mesh.material, 'wireframe');
+gui.addColor(params, 'color').onChange(() => {
+  material.color.set(params.color);
+});
+gui.add(params, 'spin');
 
 const sizes = {
   width: window.innerWidth,
