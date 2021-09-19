@@ -7,15 +7,29 @@ import gsap from 'gsap';
 /**
  * Textures
  */
-const image = new Image();
-const texture = new THREE.Texture(image);
+const loadingManager = new THREE.LoadingManager();
 
-image.onload = () => {
-  texture.needsUpdate = true;
-  console.log(texture);
+loadingManager.onStart = () => {
+  console.log('onStart');
+};
+loadingManager.onLoaded = () => {
+  console.log('onLoaded');
+};
+loadingManager.onProgress = () => {
+  console.log('onProgress');
 };
 
-image.src = './textures/door/color.jpg';
+const textureLoader = new THREE.TextureLoader(loadingManager);
+const colorTexture = textureLoader.load('/textures/minecraft.png');
+const alphaTexture = textureLoader.load('/textures/door/alpha.jpg');
+const heightTexture = textureLoader.load('/textures/door/height.jpg');
+const ambientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg');
+const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg');
+const roughnessTexture = textureLoader.load('/textures/door/roughness.jpg');
+
+// we don't need this when using magFilter = NearestFilter
+colorTexture.generateMipmaps = false;
+colorTexture.magFilter = THREE.NearestFilter;
 
 /**
  * Debug
@@ -56,8 +70,7 @@ const geometry = new THREE.BoxGeometry();
 
 // geometry.setAttribute('position', new THREE.BufferAttribute(verticies, 3));
 const material = new THREE.MeshBasicMaterial({
-  map: texture,
-  //wireframe: true,
+  map: colorTexture,
 });
 const mesh = new THREE.Mesh(geometry, material);
 
