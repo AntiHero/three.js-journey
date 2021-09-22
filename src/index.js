@@ -23,12 +23,14 @@ const textureLoader = new THREE.TextureLoader(loadingManager);
 const colorTexture = textureLoader.load('/textures/minecraft.png');
 const alphaTexture = textureLoader.load('/textures/door/alpha.jpg');
 const heightTexture = textureLoader.load('/textures/door/height.jpg');
-const ambientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg');
+const ambientOcclusionTexture = textureLoader.load(
+  '/textures/door/ambientOcclusion.jpg'
+);
 const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg');
 const roughnessTexture = textureLoader.load('/textures/door/roughness.jpg');
 
 // we don't need this when using magFilter = NearestFilter
-colorTexture.generateMipmaps = false;
+// colorTexture.generateMipmaps = false;
 colorTexture.magFilter = THREE.NearestFilter;
 
 /**
