@@ -5,6 +5,35 @@ import './css/style.css';
 import gsap from 'gsap';
 
 /**
+ * Textures
+ */
+const loadingManager = new THREE.LoadingManager();
+
+loadingManager.onStart = () => {
+  console.log('onStart');
+};
+loadingManager.onLoaded = () => {
+  console.log('onLoaded');
+};
+loadingManager.onProgress = () => {
+  console.log('onProgress');
+};
+
+const textureLoader = new THREE.TextureLoader(loadingManager);
+const colorTexture = textureLoader.load('/textures/minecraft.png');
+const alphaTexture = textureLoader.load('/textures/door/alpha.jpg');
+const heightTexture = textureLoader.load('/textures/door/height.jpg');
+const ambientOcclusionTexture = textureLoader.load(
+  '/textures/door/ambientOcclusion.jpg'
+);
+const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg');
+const roughnessTexture = textureLoader.load('/textures/door/roughness.jpg');
+
+// we don't need this when using magFilter = NearestFilter
+// colorTexture.generateMipmaps = false;
+colorTexture.magFilter = THREE.NearestFilter;
+
+/**
  * Debug
  */
 const gui = new dat.GUI({ width: 300 });
@@ -26,24 +55,24 @@ const cursor = {
 const scene = new THREE.Scene();
 const canvas = document.querySelector('.webgl');
 
-const geometry = new THREE.BufferGeometry();
+const geometry = new THREE.BoxGeometry();
+// const geometry = new THREE.BufferGeometry();
 
-const verticies = new Float32Array(9);
+// const verticies = new Float32Array(9);
 
-verticies[0] = 0;
-verticies[1] = 0;
-verticies[2] = 0;
-verticies[3] = 0;
-verticies[4] = 1;
-verticies[5] = 0;
-verticies[6] = 1;
-verticies[7] = 0;
-verticies[8] = 0;
+// verticies[0] = 0;
+// verticies[1] = 0;
+// verticies[2] = 0;
+// verticies[3] = 0;
+// verticies[4] = 1;
+// verticies[5] = 0;
+// verticies[6] = 1;
+// verticies[7] = 0;
+// verticies[8] = 0;
 
-geometry.setAttribute('position', new THREE.BufferAttribute(verticies, 3));
+// geometry.setAttribute('position', new THREE.BufferAttribute(verticies, 3));
 const material = new THREE.MeshBasicMaterial({
-  color: params.color,
-  wireframe: true,
+  map: colorTexture,
 });
 const mesh = new THREE.Mesh(geometry, material);
 
