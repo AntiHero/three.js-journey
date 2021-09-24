@@ -22,6 +22,7 @@ const ambientOcclusionTexture = textureLoader.load(
 );
 const metalnessTexture = textureLoader.load('./textures/door/metalness.jpg');
 const roughnessTexture = textureLoader.load('./textures/door/roughness.jpg');
+const normalTexture = textureLoader.load('./textures/door/normal.jpg');
 
 colorTexture.magFilter = THREE.NearestFilter;
 /**
@@ -46,15 +47,25 @@ material.shininess = 100;
 material.color.set('#ffffff');
 material.wireframe = true;
 
-
 const doorMaterial = new THREE.MeshStandardMaterial();
 doorMaterial.map = colorTexture;
+doorMaterial.metalness = 0;
+doorMaterial.roughness = 1;
 doorMaterial.aoMap = ambientOcclusionTexture;
 doorMaterial.aoMapIntensity = 1;
+doorMaterial.displacementMap = heightTexture;
+doorMaterial.displacementScale = 0.05;
+doorMaterial.roughnessMap = roughnessTexture;
+doorMaterial.metalnessMap = metalnessTexture;
+doorMaterial.normalMap = normalTexture;
+doorMaterial.normalScale.set(0.5, 0.5);
+doorMaterial.alphaMap = alphaTexture;
+doorMaterial.transparent = true;
 
-gui.add(material, 'metalness').min(0).max(1).step(0.0001);
-gui.add(material, 'roughness').min(0).max(1).step(0.0001);
+gui.add(doorMaterial, 'metalness').min(0).max(1).step(0.0001);
+gui.add(doorMaterial, 'roughness').min(0).max(1).step(0.0001);
 gui.add(doorMaterial, 'aoMapIntensity').min(1).max(10).step(1);
+gui.add(doorMaterial, 'transparent').onChange();
 
 // material.matcap = torusColorTexture;
 // material.color.set('white');
@@ -73,16 +84,25 @@ const sphere = new THREE.Mesh(
   material
 );
 
+const pointLight = new THREE.PointLight(0xffffff, 0.5);
+pointLight.position.x = 2;
+pointLight.position.z = 4;
+pointLight.position.y = 3;
+scene.add(pointLight);
+
 // const torus = new THREE.Mesh(
 //   new THREE.TorusBufferGeometry(2.5, 1, 4, 4),
 //   material
 // );
-const plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), doorMaterial);
+const plane = new THREE.Mesh(
+  new THREE.PlaneBufferGeometry(1, 1, 100, 100),
+  doorMaterial
+);
 const uvArray = plane.geometry.getAttribute('uv').array;
 
 plane.geometry.setAttribute('uv2', new THREE.BufferAttribute(uvArray, 2));
 
-plane.position.setX(-1.5);
+sphere.position.setX(-1.5);
 
 scene.add(sphere, plane /* , torus */);
 
