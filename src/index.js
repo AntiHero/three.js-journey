@@ -1,120 +1,140 @@
+import './css/style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import * as dat from 'dat.gui';
-import './css/style.css';
-import gsap from 'gsap';
+
+/**
+ * Debug
+ */
+const gui = new dat.GUI();
 
 /**
  * Textures
  */
-const loadingManager = new THREE.LoadingManager();
+const textureLoader = new THREE.TextureLoader();
 
-loadingManager.onStart = () => {
-  console.log('onStart');
-};
-loadingManager.onLoaded = () => {
-  console.log('onLoaded');
-};
-loadingManager.onProgress = () => {
-  console.log('onProgress');
-};
+const torusColorTexture = textureLoader.load('./textures/matcaps/3.png');
+const colorTexture = textureLoader.load('./textures/door/color.jpg');
 
-const textureLoader = new THREE.TextureLoader(loadingManager);
-const colorTexture = textureLoader.load('./textures/minecraft.png');
 const alphaTexture = textureLoader.load('./textures/door/alpha.jpg');
 const heightTexture = textureLoader.load('./textures/door/height.jpg');
 const ambientOcclusionTexture = textureLoader.load(
   './textures/door/ambientOcclusion.jpg'
 );
-const roughnessTexture = textureLoader.load('./textures/door/roughness.jpg');
+
 const metalnessTexture = textureLoader.load('./textures/door/metalness.jpg');
+const roughnessTexture = textureLoader.load('./textures/door/roughness.jpg');
+const normalTexture = textureLoader.load('./textures/door/normal.jpg');
 
-// we don't need this when using magFilter = NearestFilter
-// colorTexture.generateMipmaps = false;
+
 colorTexture.magFilter = THREE.NearestFilter;
-
 /**
- * Debug
+ * Base
  */
-const gui = new dat.GUI({ width: 300 });
-// gui.hide();
+// Canvas
+const canvas = document.querySelector('canvas.webgl');
 
-const params = {
-  color: 0xee00aa,
-  spin: () => {},
-};
-
-/**
- * Cursor
- */
-const cursor = {
-  x: 0,
-  y: 0,
-};
-
+// Scene
 const scene = new THREE.Scene();
-const canvas = document.querySelector('.webgl');
 
-const geometry = new THREE.BoxGeometry();
-// const geometry = new THREE.BufferGeometry();
+// const material = new THREE.MeshNormalMaterial({
+//   // map: colorTexture
+//   flatShading: true,
+// });
 
-// const verticies = new Float32Array(9);
+// const material = new THREE.MeshMatcapMaterial();
+// const material = new THREE.MeshPhongMaterial();
+const material = new THREE.MeshStandardMaterial();
 
-// verticies[0] = 0;
-// verticies[1] = 0;
-// verticies[2] = 0;
-// verticies[3] = 0;
-// verticies[4] = 1;
-// verticies[5] = 0;
-// verticies[6] = 1;
-// verticies[7] = 0;
-// verticies[8] = 0;
+material.shininess = 100;
+material.color.set('#ffffff');
+material.wireframe = true;
 
-// geometry.setAttribute('position', new THREE.BufferAttribute(verticies, 3));
-const material = new THREE.MeshBasicMaterial({
-  map: colorTexture,
-});
-const mesh = new THREE.Mesh(geometry, material);
+const doorMaterial = new THREE.MeshStandardMaterial();
+doorMaterial.map = colorTexture;
+doorMaterial.metalness = 0;
+doorMaterial.roughness = 1;
+doorMaterial.aoMap = ambientOcclusionTexture;
+doorMaterial.aoMapIntensity = 1;
+doorMaterial.displacementMap = heightTexture;
+doorMaterial.displacementScale = 0.05;
+doorMaterial.roughnessMap = roughnessTexture;
+doorMaterial.metalnessMap = metalnessTexture;
+doorMaterial.normalMap = normalTexture;
+doorMaterial.normalScale.set(0.5, 0.5);
+doorMaterial.alphaMap = alphaTexture;
+doorMaterial.transparent = true;
 
-params.spin = () => {
-  gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + 10 });
-};
+gui.add(doorMaterial, 'metalness').min(0).max(1).step(0.0001);
+gui.add(doorMaterial, 'roughness').min(0).max(1).step(0.0001);
+gui.add(doorMaterial, 'aoMapIntensity').min(1).max(10).step(1);
+gui.add(doorMaterial, 'transparent').onChange();
 
-scene.add(mesh);
+// material.matcap = torusColorTexture;
+// material.color.set('white');
 
-gui.add(mesh.position, 'y', -3, 3, 0.1).name('elevation');
-gui.add(mesh.position, 'x', -3, 3, 0.1);
-gui.add(mesh, 'visible');
-gui.add(mesh.material, 'wireframe');
-gui.addColor(params, 'color').onChange(() => {
-  material.color.set(params.color);
-});
-gui.add(params, 'spin');
+// sets visibility of texture on both sides
+// material.side = THREE.DoubleSide;
 
+/**
+ * Light
+ */
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+
+const sphere = new THREE.Mesh(
+  new THREE.SphereBufferGeometry(0.5, 32, 16),
+  material
+);
+
+const pointLight = new THREE.PointLight(0xffffff, 0.5);
+pointLight.position.x = 2;
+pointLight.position.z = 4;
+pointLight.position.y = 3;
+scene.add(pointLight);
+
+// const torus = new THREE.Mesh(
+//   new THREE.TorusBufferGeometry(2.5, 1, 4, 4),
+//   material
+// );
+const plane = new THREE.Mesh(
+  new THREE.PlaneBufferGeometry(1, 1, 100, 100),
+  doorMaterial
+);
+const uvArray = plane.geometry.getAttribute('uv').array;
+
+plane.geometry.setAttribute('uv2', new THREE.BufferAttribute(uvArray, 2));
+
+sphere.position.setX(-1.5);
+
+scene.add(sphere, plane /* , torus */);
+
+/**
+ * Sizes
+ */
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 };
 
-const aspectRatio = sizes.width / sizes.height;
-const camera = new THREE.PerspectiveCamera(75, aspectRatio);
-
+/**
+ * Camera
+ */
+// Base camera
+const camera = new THREE.PerspectiveCamera(
+  75,
+  sizes.width / sizes.height,
+  0.1,
+  100
+);
+camera.position.x = 1;
+camera.position.y = 1;
 camera.position.z = 2;
-camera.position.y = 2;
-camera.position.x = 2;
 scene.add(camera);
 
-/**
- * Controls
- */
+// Controls
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
-
-/**
- * Axis
- */
-// const axesHelper = new THREE.AxesHelper();
-// scene.add(axesHelper);
 
 /**
  * Renderer
@@ -122,57 +142,44 @@ controls.enableDamping = true;
 const renderer = new THREE.WebGLRenderer({
   canvas,
 });
-
 renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
+/**
+ * Animate
+ */
 const clock = new THREE.Clock();
-
-// gsap.to(mesh.position, {
-//  duration: 1,
-//  delay: 1.5,
-//  x: -1,
-// });
-window.addEventListener('resize', () => {
-  sizes.width = window.innerWidth;
-  sizes.height = window.innerHeight;
-
-  // update camera
-  camera.aspect = sizes.width / sizes.height;
-  camera.updateProjectionMatrix();
-
-  // update renderer
-  renderer.setSize(sizes.width, sizes.height);
-
-  // set pixel ration
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-});
-
-window.addEventListener('mousemove', (ev) => {
-  cursor.x = ev.clientX / sizes.width - 0.5;
-  cursor.y = -ev.clientY / sizes.height + 0.5;
-});
-
-window.addEventListener('dblclick', () => {
-  if (!document.fullscreenElement) {
-    canvas.requestFullscreen();
-  } else {
-    document.exitFullscreen();
-  }
-});
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  // mesh.rotation.y = Math.sin(elapsedTime * Math.PI * 2);
-  // camera.position.x = Math.sin(cursor.x * Math.PI * 2) * 5;
-  // camera.position.z = Math.cos(cursor.x * Math.PI * 2) * 5;
-  // camera.position.y = cursor.y * 5;
-  // camera.lookAt(mesh.position)
+  // Update objects
+  sphere.rotation.y = 0.1 * elapsedTime;
+  // plane.rotation.y = -2 * elapsedTime;
+  // torus.rotation.y = 0.1 * elapsedTime;
 
+  // Update controls
   controls.update();
 
+  // Render
   renderer.render(scene, camera);
+
+  // Call tick again on the next frame
   window.requestAnimationFrame(tick);
 };
 
 tick();
+
+window.addEventListener('resize', () => {
+  // Update sizes
+  sizes.width = window.innerWidth;
+  sizes.height = window.innerHeight;
+
+  // Update camera
+  camera.aspect = sizes.width / sizes.height;
+  camera.updateProjectionMatrix();
+
+  // Update renderer
+  renderer.setSize(sizes.width, sizes.height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
