@@ -1,113 +1,73 @@
 import './css/style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import * as dat from 'dat.gui';
 
-/**
- * Debug
- */
-const gui = new dat.GUI();
-
-/**
- * Textures
- */
-const textureLoader = new THREE.TextureLoader();
-
-const torusColorTexture = textureLoader.load('./textures/matcaps/3.png');
-const colorTexture = textureLoader.load('./textures/door/color.jpg');
-
-const alphaTexture = textureLoader.load('./textures/door/alpha.jpg');
-const heightTexture = textureLoader.load('./textures/door/height.jpg');
-const ambientOcclusionTexture = textureLoader.load(
-  './textures/door/ambientOcclusion.jpg'
-);
-
-const metalnessTexture = textureLoader.load('./textures/door/metalness.jpg');
-const roughnessTexture = textureLoader.load('./textures/door/roughness.jpg');
-const normalTexture = textureLoader.load('./textures/door/normal.jpg');
-
-
-colorTexture.magFilter = THREE.NearestFilter;
-/**
- * Base
- */
 // Canvas
 const canvas = document.querySelector('canvas.webgl');
 
 // Scene
 const scene = new THREE.Scene();
 
-// const material = new THREE.MeshNormalMaterial({
-//   // map: colorTexture
-//   flatShading: true,
-// });
-
-// const material = new THREE.MeshMatcapMaterial();
-// const material = new THREE.MeshPhongMaterial();
-const material = new THREE.MeshStandardMaterial();
-
-material.shininess = 100;
-material.color.set('#ffffff');
-material.wireframe = true;
-
-const doorMaterial = new THREE.MeshStandardMaterial();
-doorMaterial.map = colorTexture;
-doorMaterial.metalness = 0;
-doorMaterial.roughness = 1;
-doorMaterial.aoMap = ambientOcclusionTexture;
-doorMaterial.aoMapIntensity = 1;
-doorMaterial.displacementMap = heightTexture;
-doorMaterial.displacementScale = 0.05;
-doorMaterial.roughnessMap = roughnessTexture;
-doorMaterial.metalnessMap = metalnessTexture;
-doorMaterial.normalMap = normalTexture;
-doorMaterial.normalScale.set(0.5, 0.5);
-doorMaterial.alphaMap = alphaTexture;
-doorMaterial.transparent = true;
-
-gui.add(doorMaterial, 'metalness').min(0).max(1).step(0.0001);
-gui.add(doorMaterial, 'roughness').min(0).max(1).step(0.0001);
-gui.add(doorMaterial, 'aoMapIntensity').min(1).max(10).step(1);
-gui.add(doorMaterial, 'transparent').onChange();
-
-// material.matcap = torusColorTexture;
-// material.color.set('white');
-
-// sets visibility of texture on both sides
-// material.side = THREE.DoubleSide;
-
 /**
- * Light
+ * TExture loader
  */
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-scene.add(ambientLight);
+const textureLoader = new THREE.TextureLoader();
+/**
+ * Fonts loader
+ */
+const fontsLoader = new THREE.FontLoader();
 
-const sphere = new THREE.Mesh(
-  new THREE.SphereBufferGeometry(0.5, 32, 16),
-  material
-);
+fontsLoader.load('./fonts/helvetiker_regular.typeface.json', (font) => {
+  const textGeometry = new THREE.TextBufferGeometry('Aleksandr Schemelev', {
+    font,
+    size: 0.5,
+    height: 0.2,
+    curveSegments: 4,
+    bevelEnabled: true,
+    bevelThickness: 0.03,
+    bevelSize: 0.02,
+    bevelOffset: 0,
+    bevelSegments: 2,
+  });
 
-const pointLight = new THREE.PointLight(0xffffff, 0.5);
-pointLight.position.x = 2;
-pointLight.position.z = 4;
-pointLight.position.y = 3;
-scene.add(pointLight);
+  textGeometry.center();
+  const matcapTexture = textureLoader.load('./textures/matcaps/7.png');
+  // textGeometry.computeBoundingBox();
+  // textGeometry.translate(
+  //   -textGeometry.boundingBox.max.x * 0.5,
+  //   -textGeometry.boundingBox.max.y * 0.5,
+  //   -textGeometry.boundingBox.max.z * 0.5
+  // );
 
-// const torus = new THREE.Mesh(
-//   new THREE.TorusBufferGeometry(2.5, 1, 4, 4),
-//   material
-// );
-const plane = new THREE.Mesh(
-  new THREE.PlaneBufferGeometry(1, 1, 100, 100),
-  doorMaterial
-);
-const uvArray = plane.geometry.getAttribute('uv').array;
+  const textMaterial = new THREE.MeshMatcapMaterial({
+    matcap: matcapTexture,
+  });
+  const text = new THREE.Mesh(textGeometry, textMaterial);
+  scene.add(text);
 
-plane.geometry.setAttribute('uv2', new THREE.BufferAttribute(uvArray, 2));
+  const donutMatcapMaterial = textureLoader.load('./textures/matcaps/3.png');
 
-sphere.position.setX(-1.5);
+  console.time('donut');
+  const donutGeometry = new THREE.TorusBufferGeometry(0.3, 0.2, 28, 45);
+  const donutMaterial = new THREE.MeshMatcapMaterial({
+    matcap: donutMatcapMaterial,
+  });
+  for (let i = 0; i < 200; i += 1) {
+    const donut = new THREE.Mesh(donutGeometry, donutMaterial);
+    donut.position.y = (Math.random() - 0.5) * 10;
+    donut.position.x = (Math.random() - 0.5) * 10;
+    donut.position.z = (Math.random() - 0.5) * 10;
 
-scene.add(sphere, plane /* , torus */);
+    donut.rotation.x = Math.random() * Math.PI;
+    donut.rotation.y = Math.random() * Math.PI;
+
+    const scale = Math.random();
+
+    donut.scale.set(scale, scale, scale);
+    scene.add(donut);
+  }
+  console.timeEnd('donut');
+});
 
 /**
  * Sizes
@@ -152,11 +112,6 @@ const clock = new THREE.Clock();
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
-
-  // Update objects
-  sphere.rotation.y = 0.1 * elapsedTime;
-  // plane.rotation.y = -2 * elapsedTime;
-  // torus.rotation.y = 0.1 * elapsedTime;
 
   // Update controls
   controls.update();
