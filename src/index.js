@@ -26,7 +26,6 @@ scene.add(ambientLight);
 
 gui.add(ambientLight, 'intensity').min(0).max(1).step(0.01);
 
-
 const directionalLight = new THREE.DirectionalLight();
 directionalLight.intensity = 0.3;
 scene.add(directionalLight);
@@ -36,6 +35,9 @@ pointLight.position.x = 2;
 pointLight.position.y = 3;
 pointLight.position.z = 4;
 scene.add(pointLight);
+
+const hemiSphere = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.5);
+scene.add(hemiSphere);
 
 /**
  * Objects
