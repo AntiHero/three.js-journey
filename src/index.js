@@ -1,6 +1,13 @@
 import './css/style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import * as dat from 'dat.gui';
+
+/**
+ * Base
+ */
+// Debug
+const gui = new dat.GUI();
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl');
@@ -9,65 +16,49 @@ const canvas = document.querySelector('canvas.webgl');
 const scene = new THREE.Scene();
 
 /**
- * TExture loader
+ * Lights
  */
-const textureLoader = new THREE.TextureLoader();
+const ambientLight = new THREE.AmbientLight();
+ambientLight.color = new THREE.Color(0xffffff);
+ambientLight.intensity = 0.5;
+scene.add(ambientLight);
+
+const pointLight = new THREE.PointLight(0xffffff, 0.5);
+pointLight.position.x = 2;
+pointLight.position.y = 3;
+pointLight.position.z = 4;
+scene.add(pointLight);
+
 /**
- * Fonts loader
+ * Objects
  */
-const fontsLoader = new THREE.FontLoader();
+// Material
+const material = new THREE.MeshStandardMaterial();
+material.roughness = 0.4;
 
-fontsLoader.load('./fonts/helvetiker_regular.typeface.json', (font) => {
-  const textGeometry = new THREE.TextBufferGeometry('Aleksandr Schemelev', {
-    font,
-    size: 0.5,
-    height: 0.2,
-    curveSegments: 4,
-    bevelEnabled: true,
-    bevelThickness: 0.03,
-    bevelSize: 0.02,
-    bevelOffset: 0,
-    bevelSegments: 2,
-  });
+// Objects
+const sphere = new THREE.Mesh(
+  new THREE.SphereBufferGeometry(0.5, 32, 32),
+  material
+);
+sphere.position.x = -1.5;
 
-  textGeometry.center();
-  const matcapTexture = textureLoader.load('./textures/matcaps/7.png');
-  // textGeometry.computeBoundingBox();
-  // textGeometry.translate(
-  //   -textGeometry.boundingBox.max.x * 0.5,
-  //   -textGeometry.boundingBox.max.y * 0.5,
-  //   -textGeometry.boundingBox.max.z * 0.5
-  // );
+const cube = new THREE.Mesh(
+  new THREE.BoxBufferGeometry(0.75, 0.75, 0.75),
+  material
+);
 
-  const textMaterial = new THREE.MeshMatcapMaterial({
-    matcap: matcapTexture,
-  });
-  const text = new THREE.Mesh(textGeometry, textMaterial);
-  scene.add(text);
+const torus = new THREE.Mesh(
+  new THREE.TorusBufferGeometry(0.3, 0.2, 32, 64),
+  material
+);
+torus.position.x = 1.5;
 
-  const donutMatcapMaterial = textureLoader.load('./textures/matcaps/3.png');
+const plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(5, 5), material);
+plane.rotation.x = -Math.PI * 0.5;
+plane.position.y = -0.65;
 
-  console.time('donut');
-  const donutGeometry = new THREE.TorusBufferGeometry(0.3, 0.2, 28, 45);
-  const donutMaterial = new THREE.MeshMatcapMaterial({
-    matcap: donutMatcapMaterial,
-  });
-  for (let i = 0; i < 200; i += 1) {
-    const donut = new THREE.Mesh(donutGeometry, donutMaterial);
-    donut.position.y = (Math.random() - 0.5) * 10;
-    donut.position.x = (Math.random() - 0.5) * 10;
-    donut.position.z = (Math.random() - 0.5) * 10;
-
-    donut.rotation.x = Math.random() * Math.PI;
-    donut.rotation.y = Math.random() * Math.PI;
-
-    const scale = Math.random();
-
-    donut.scale.set(scale, scale, scale);
-    scene.add(donut);
-  }
-  console.timeEnd('donut');
-});
+scene.add(sphere, cube, torus, plane);
 
 /**
  * Sizes
@@ -113,6 +104,15 @@ const clock = new THREE.Clock();
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
+  // Update objects
+  sphere.rotation.y = 0.1 * elapsedTime;
+  cube.rotation.y = 0.1 * elapsedTime;
+  torus.rotation.y = 0.1 * elapsedTime;
+
+  sphere.rotation.x = 0.15 * elapsedTime;
+  cube.rotation.x = 0.15 * elapsedTime;
+  torus.rotation.x = 0.15 * elapsedTime;
+
   // Update controls
   controls.update();
 
@@ -122,8 +122,6 @@ const tick = () => {
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
 };
-
-tick();
 
 window.addEventListener('resize', () => {
   // Update sizes
@@ -138,3 +136,5 @@ window.addEventListener('resize', () => {
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
+
+tick();
