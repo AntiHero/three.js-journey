@@ -9,6 +9,7 @@ import * as dat from 'dat.gui';
 // Debug
 const gui = new dat.GUI();
 
+
 // Canvas
 const canvas = document.querySelector('canvas.webgl');
 
@@ -22,6 +23,13 @@ const ambientLight = new THREE.AmbientLight();
 ambientLight.color = new THREE.Color(0xffffff);
 ambientLight.intensity = 0.5;
 scene.add(ambientLight);
+
+gui.add(ambientLight, 'intensity').min(0).max(1).step(0.01);
+
+
+const directionalLight = new THREE.DirectionalLight();
+directionalLight.intensity = 0.3;
+scene.add(directionalLight);
 
 const pointLight = new THREE.PointLight(0xffffff, 0.5);
 pointLight.position.x = 2;
