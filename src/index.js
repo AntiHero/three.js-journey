@@ -2,13 +2,12 @@ import './css/style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import * as dat from 'dat.gui';
-
+import { RectAreaLightHelper } from 'three/examples/jsm/helpers/RectAreaLightHelper';
 /**
  * Base
  */
 // Debug
 const gui = new dat.GUI();
-
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl');
@@ -19,16 +18,23 @@ const scene = new THREE.Scene();
 /**
  * Lights
  */
-const ambientLight = new THREE.AmbientLight();
-ambientLight.color = new THREE.Color(0xffffff);
-ambientLight.intensity = 0.5;
-scene.add(ambientLight);
+// const ambientLight = new THREE.AmbientLight();
+// ambientLight.color = new THREE.Color(0xffffff);
+// ambientLight.intensity = 0.5;
+// scene.add(ambientLight);
 
-gui.add(ambientLight, 'intensity').min(0).max(1).step(0.01);
+// gui.add(ambientLight, 'intensity').min(0).max(1).step(0.01);
 
 const directionalLight = new THREE.DirectionalLight();
 directionalLight.intensity = 0.3;
 scene.add(directionalLight);
+
+const directionalLightHelper = new THREE.DirectionalLightHelper(
+  directionalLight,
+  0.2
+);
+
+scene.add(directionalLightHelper);
 
 const pointLight = new THREE.PointLight(0xffffff, 0.5);
 pointLight.position.x = 2;
@@ -36,8 +42,27 @@ pointLight.position.y = 3;
 pointLight.position.z = 4;
 scene.add(pointLight);
 
-const hemiSphere = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.5);
-scene.add(hemiSphere);
+const hemisphereLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.5);
+scene.add(hemisphereLight);
+
+const hemisphereLightHelper = new THREE.HemisphereLightHelper(
+  hemisphereLight,
+  0.2
+);
+scene.add(hemisphereLightHelper);
+
+const rectAreaLight = new THREE.RectAreaLight(0xff00ff, 2, 1, 11);
+scene.add(rectAreaLight);
+rectAreaLight.position.set(-1.5, 0, 1.5);
+rectAreaLight.lookAt(new THREE.Vector3());
+
+const rectAreaLightHelper = new RectAreaLightHelper(rectAreaLight, 0.2);
+scene.add(rectAreaLightHelper);
+
+window.requestAnimationFrame(() => {
+  rectAreaLightHelper.position.cppy(rectAreaLight.position);
+  rectAreaLightHelper.quaternion.cppy(rectAreaLight.quaternion);
+})
 
 /**
  * Objects
