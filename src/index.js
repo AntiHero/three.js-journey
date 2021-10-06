@@ -1,13 +1,9 @@
 import './css/style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import * as dat from 'dat.gui';
-import { RectAreaLightHelper } from 'three/examples/jsm/helpers/RectAreaLightHelper';
 /**
  * Base
  */
-// Debug
-const gui = new dat.GUI();
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl');
@@ -18,57 +14,24 @@ const scene = new THREE.Scene();
 /**
  * Lights
  */
-// const ambientLight = new THREE.AmbientLight();
-// ambientLight.color = new THREE.Color(0xffffff);
-// ambientLight.intensity = 0.5;
-// scene.add(ambientLight);
+const ambientLight = new THREE.AmbientLight();
+ambientLight.color = new THREE.Color(0xffffff);
+scene.add(ambientLight);
 
 // gui.add(ambientLight, 'intensity').min(0).max(1).step(0.01);
 
-const directionalLight = new THREE.DirectionalLight();
-directionalLight.intensity = 0.3;
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
+directionalLight.position.setX(1.5);
+directionalLight.castShadow = true;
+
 scene.add(directionalLight);
-
-const directionalLightHelper = new THREE.DirectionalLightHelper(
-  directionalLight,
-  0.2
-);
-
-scene.add(directionalLightHelper);
-
-const pointLight = new THREE.PointLight(0xffffff, 0.5);
-pointLight.position.x = 2;
-pointLight.position.y = 3;
-pointLight.position.z = 4;
-scene.add(pointLight);
-
-const hemisphereLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.5);
-scene.add(hemisphereLight);
-
-const hemisphereLightHelper = new THREE.HemisphereLightHelper(
-  hemisphereLight,
-  0.2
-);
-scene.add(hemisphereLightHelper);
-
-const rectAreaLight = new THREE.RectAreaLight(0xff00ff, 2, 1, 11);
-scene.add(rectAreaLight);
-rectAreaLight.position.set(-1.5, 0, 1.5);
-rectAreaLight.lookAt(new THREE.Vector3());
-
-const rectAreaLightHelper = new RectAreaLightHelper(rectAreaLight, 0.2);
-scene.add(rectAreaLightHelper);
-
-window.requestAnimationFrame(() => {
-  rectAreaLightHelper.position.cppy(rectAreaLight.position);
-  rectAreaLightHelper.quaternion.cppy(rectAreaLight.quaternion);
-})
 
 /**
  * Objects
  */
 // Material
 const material = new THREE.MeshStandardMaterial();
+material.metalness = 0.5;
 material.roughness = 0.4;
 
 // Objects
@@ -76,25 +39,16 @@ const sphere = new THREE.Mesh(
   new THREE.SphereBufferGeometry(0.5, 32, 32),
   material
 );
-sphere.position.x = -1.5;
 
-const cube = new THREE.Mesh(
-  new THREE.BoxBufferGeometry(0.75, 0.75, 0.75),
-  material
-);
-
-const torus = new THREE.Mesh(
-  new THREE.TorusBufferGeometry(0.3, 0.2, 32, 64),
-  material
-);
-torus.position.x = 1.5;
+sphere.castShadow = true;
 
 const plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(5, 5), material);
+plane.receiveShadow = true;
+
 plane.rotation.x = -Math.PI * 0.5;
-plane.position.y = -0.65;
+plane.position.y = -0.5;
 
-scene.add(sphere, cube, torus, plane);
-
+scene.add(sphere, plane);
 /**
  * Sizes
  */
@@ -115,7 +69,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.x = 1;
 camera.position.y = 1;
-camera.position.z = 2;
+camera.position.z = 3;
 scene.add(camera);
 
 // Controls
@@ -131,6 +85,8 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
+renderer.shadowMap.enabled = true;
+
 /**
  * Animate
  */
@@ -141,12 +97,7 @@ const tick = () => {
 
   // Update objects
   sphere.rotation.y = 0.1 * elapsedTime;
-  cube.rotation.y = 0.1 * elapsedTime;
-  torus.rotation.y = 0.1 * elapsedTime;
-
   sphere.rotation.x = 0.15 * elapsedTime;
-  cube.rotation.x = 0.15 * elapsedTime;
-  torus.rotation.x = 0.15 * elapsedTime;
 
   // Update controls
   controls.update();
