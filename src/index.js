@@ -26,6 +26,7 @@ directionalLight.position.setX(1.5);
 directionalLight.castShadow = true;
 directionalLight.shadow.mapSize.width = 1024;
 directionalLight.shadow.mapSize.height = 1024;
+directionalLight.shadow.camera.far = 6;
 
 const directionalCameraHelper = new THREE.CameraHelper(
   directionalLight.shadow.camera
