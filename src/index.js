@@ -1,6 +1,7 @@
 import './css/style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { DirectionalLightHelper } from 'three';
 /**
  * Base
  */
@@ -23,8 +24,14 @@ scene.add(ambientLight);
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
 directionalLight.position.setX(1.5);
 directionalLight.castShadow = true;
+directionalLight.shadow.mapSize.width = 1024;
+directionalLight.shadow.mapSize.height = 1024;
 
+const directionalCameraHelper = new THREE.CameraHelper(
+  directionalLight.shadow.camera
+);
 scene.add(directionalLight);
+scene.add(directionalCameraHelper);
 
 /**
  * Objects
