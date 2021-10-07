@@ -4,6 +4,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 /**
  * Base
  */
+const textureLoader = new THREE.TextureLoader();
+const bakedShadow = textureLoader.load('./shadows/bakedShadow.jpg');
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl');
@@ -85,7 +87,13 @@ const sphere = new THREE.Mesh(
 
 sphere.castShadow = true;
 
-const plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(5, 5), material);
+const plane = new THREE.Mesh(
+  new THREE.PlaneBufferGeometry(5, 5),
+  material
+  // new THREE.MeshBasicMaterial({
+  //   map: bakedShadow,
+  // })
+);
 plane.receiveShadow = true;
 
 plane.rotation.x = -Math.PI * 0.5;
@@ -120,7 +128,7 @@ const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 
 /**
- * 
+ *
  */
 const renderer = new THREE.WebGLRenderer({
   canvas,
@@ -128,7 +136,7 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-renderer.shadowMap.enabled = false;
+renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 /**
  * Animate
@@ -139,9 +147,9 @@ const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
   // Update objects
-  sphere.rotation.y = 0.1 * elapsedTime;
-  sphere.rotation.x = 0.15 * elapsedTime;
-
+  sphere.position.x = Math.cos(elapsedTime);
+  sphere.position.z = Math.sin(elapsedTime);
+  sphere.position.y = Math.abs(Math.sin(elapsedTime * 5)) * 0.5;
   // Update controls
   controls.update();
 
